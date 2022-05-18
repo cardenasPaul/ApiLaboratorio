@@ -28,7 +28,7 @@ async function buscarContribuyentePorCuit(cuit){
         let pool = await sql.connect(config);
         let facturas = await pool.request()
         .input('cuit',sql.VarChar, cuit)
-        .query("SELECT * FROM UME WHERE UMECU = @cuit");
+        .query("SELECT [UME].UMEID AS ID FROM [UME] WHERE [UME].UMECU = @cuit;");
         return facturas.recordsets;
     } catch (error) {
         console.log(error);

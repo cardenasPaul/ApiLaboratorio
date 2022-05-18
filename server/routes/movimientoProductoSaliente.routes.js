@@ -24,7 +24,7 @@ router.route('/movimientoProductoSaliente/update').put((request,response)=>{
     const{
         recno,
         baseImponible,
-        fechaDeclaracion,
+        fechaDeclaracion,//agregar iv
         cabeceraOriginante
     } = request.query;
     console.log(request.query)

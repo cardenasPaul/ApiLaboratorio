@@ -1,6 +1,7 @@
 const { response } = require('express');
 var express = require('express');
 var contribuyentectr = require('../controllers/contribuyente.controller');
+var logica = require('../controllers/logicaNegocio.controller')
 
 var router = express.Router();
 
@@ -30,6 +31,13 @@ router.route('/contribuyente').post((request,response)=>{
 
     let contribuyente = {...request.body}
     contribuyentectr.addContribuyente(contribuyente).then(result => {
+        response.status(201).json();
+    })
+})
+//logica de negocios
+router.route('/test').get((request,response)=>{
+
+    logica.registrarFactura(5000000,'000004').then(result => {
         response.status(201).json();
     })
 })

@@ -2,6 +2,24 @@ var config = require('./../.././config/dbconfig');
 const sql = require('mssql');
 const { request } = require('express');
 
+async function getLastRecno() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT RECNO + 1 as id FROM [IV] WHERE RECNO = (SELECT MAX(RECNO) FROM [IV]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function getLastID() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT CONVERT(numeric,IVID)+1 as id FROM [IV] WHERE IVID = (SELECT MAX(IVID) FROM [IV]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
 async function getItemVentas(){
     try {
         let pool = await sql.connect(config);
@@ -11,19 +29,17 @@ async function getItemVentas(){
         console.log(error);
     }
 }
-
 async function getItemVentasById(idItem){
     try {
         let pool = await sql.connect(config);
         let item = await pool.request()
         .input('input_parameter',sql.VarChar, idItem)
         .query("SELECT * FROM IV where IVID = @input_parameter");
-        return item.recordsets;
+        return item.recordsets[0];
     } catch (error) {
         console.log(error);
     }
 }
-
 async function addItemVentas(item){
     try {
         let pool = await sql.connect(config);
@@ -75,5 +91,7 @@ async function addItemVentas(item){
 module.exports = {
     getItemVentas: getItemVentas,
     getItemVentasById: getItemVentasById,
-    addItemVentas: addItemVentas
+    addItemVentas: addItemVentas,
+    getLastID: getLastID,
+    getLastRecno: getLastRecno
 }

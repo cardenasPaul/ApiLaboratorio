@@ -2,6 +2,25 @@ var config = require('./../.././config/dbconfig');
 const sql = require('mssql');
 const { request } = require('express');
 
+async function getLastRecno() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT RECNO + 1 AS id FROM [MME] WHERE RECNO = (SELECT MAX(RECNO) FROM [MME]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function getLastID() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT CONVERT(numeric,MMEID)+1 AS id FROM [MME] WHERE MMEID = (SELECT MAX(MMEID) FROM [MME]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 async function getMovimientoMontoEntrante(){
     try {
         let pool = await sql.connect(config);
@@ -71,5 +90,7 @@ async function addMovimientoMontoEntrante(movimiento){
  module.exports = {
      getMovimientoMontoEntrante: getMovimientoMontoEntrante,
      getMovimientoMontoEntranteById: getMovimientoMontoEntranteById,
-     addMovimientoMontoEntrante: addMovimientoMontoEntrante
+     addMovimientoMontoEntrante: addMovimientoMontoEntrante,
+     getLastID: getLastID,
+     getLastRecno: getLastRecno
  }

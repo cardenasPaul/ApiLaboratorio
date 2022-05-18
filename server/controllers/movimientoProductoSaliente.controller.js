@@ -40,6 +40,7 @@ async function updateById( recno, baseImponible, fechaDeclaracion, cabeceraOrigi
         console.log(error);
     }
 }
+
 async function addMovimientoProductoSaliente(movimiento){
     try {
         let pool = await sql.connect(config);
@@ -116,12 +117,22 @@ async function addMovimientoProductoSaliente(movimiento){
          console.log("Error en la insercion de datos: " + error);
      }
  } 
- 
+async function devolverUltimosID(){
+    try {
+        let pool = await sql.connect(config);
+        let producto = await pool.request()
+        .query(`SELECT MAX(RECNO)+1 as [RECNO], MAX(CONVERT(Numeric, IVID))+1 as [IVID]  from iv;`);
+        return producto.recordsets;
+    } catch (error) {
+        console.log(error);
+    }
+}
  
 
  module.exports = {
     getMovimientoProductoSaliente: getMovimientoProductoSaliente,
      getMovimientoProductoSalienteById: getMovimientoProductoSalienteById,
      addMovimientoProductoSaliente: addMovimientoProductoSaliente,
-     updateMovimientoProductoSaliente: updateById
+     updateMovimientoProductoSaliente: updateById,
+     getLastMovimientoProductoSalienteID:devolverUltimosID
  }

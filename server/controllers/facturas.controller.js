@@ -2,6 +2,24 @@ var config = require('./../.././config/dbconfig');
 const sql = require('mssql');
 const { request } = require('express');
 
+async function getLastRecno() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT MAX(RECNO) + 1 AS id FROM [FV] WHERE RECNO = (SELECT MAX(RECNO) FROM [FV]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function getLastID() {
+    try {
+        let pool = await sql.connect(config);
+        let facturas = await pool.request().query("SELECT MAX(FVID) + 1 AS id FROM  [FV] WHERE FVID = (SELECT MAX(FVID) FROM [FV]);");
+        return facturas.recordset[0].id;
+    } catch (error) {
+        console.log(error);
+    }
+}
 async function getFacturas(){
     try {
         let pool = await sql.connect(config);
@@ -81,5 +99,7 @@ async function addFactura(factura){
 module.exports = {
     getFacturas: getFacturas,
     getFacturasById: getFacturasById,
-    addFactura: addFactura
+    addFactura: addFactura,
+    getLastID: getLastID,
+    getLastRecno: getLastRecno
 }
