@@ -1,5 +1,5 @@
 const constantes ={
-    alicuota: .025,
+    alicuota: "0.025",
     servicioGuardado: 'webService',
     conceptoItem: "B",
     conceptoFactura: "FV"

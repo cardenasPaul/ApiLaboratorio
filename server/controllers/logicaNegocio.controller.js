@@ -26,7 +26,7 @@ async function registrarFactura(baseImponible, idContribuyente){
             request.input('_NServicio',sql.NVarChar,utilidades.nombreServicio())
             request.input('_CFactura',sql.NVarChar,utilidades.conceptoFactura())
             request.input('_CItem',sql.NVarChar,utilidades.conceptoItem())
-            request.input('_VAlicuota',sql.Numeric,utilidades.valorAlicuota())//parcearFecha
+            request.input('_VAlicuota',sql.Numeric(13,6),utilidades.valorAlicuota())//parcearFecha
             request.input('_FSistema',sql.NVarChar,utilidades.fechaConFormato())
             request.input('_BImponible',sql.Int,baseImponible)
             request.input('_IDContribuyente',sql.NVarChar,idContribuyente)
@@ -58,7 +58,7 @@ async function registrarFactura(baseImponible, idContribuyente){
             SET @nombre_servicio = @_NServicio;
             SET @concepto_factura = @_CFactura;
             SET @concepto_item = @_CItem;
-            SET @alicuota = @_VAlicuota;
+            SET @alicuota = CAST(@_VAlicuota as FLOAT);
             SET @fecha_sistema = @_FSistema;
             SET @base_imponible = @_BImponible;
             SET @id_contribuyente = @_IDContribuyente;
@@ -86,6 +86,18 @@ async function registrarFactura(baseImponible, idContribuyente){
                 @id_mme AS [id movimiento],
                 @id_iv AS [id item];`+
             //alta de fv
+            `  insert into fv([RECNO],[IS_DELETED],[FVID],[FVUME],[FVTS],[FVEF],[FVQP],[FVQM]) 
+            values(
+            @recno_fv,'N' ,@id_fv, @recno_mps,@fecha_sistema,@nombre_servicio,@base_imponible,(@base_imponible * 0.025)
+            );`+
+            //alta de iv
+            `  insert into iv([RECNO],[IS_DELETED],[IVID],[IVPR],[IVFV],[IVUME],[IVTS],[IVRF],[IVQP],[IVQMEX],[IVQM],[IVDMR]) 
+            values (
+              @recno_iv, 'N', @id_iv, @concepto_item, @id_iv, @recno_mps, @fecha_sistema, @concepto_item, @base_imponible, @alicuota, (@base_imponible * 0.025), @nombre_servicio
+            )`+
+            //alta mme
+            ``+
+            //update mps
             ``
             , (err, result) => {
                 //resultados
