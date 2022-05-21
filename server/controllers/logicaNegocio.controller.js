@@ -8,7 +8,7 @@ var controladorItem = require('./itemVentas.controller');
 var controladorMonedaEntrante = require('./movimientoMontoEntrante.controller');
 
 
-async function registrarFactura(baseImponible, idContribuyente){
+async function registrarFactura(baseImponible, idContribuyente, recnoMontoProductoSaliente){
     try {
         let pool = await sql.connect(config);
         const transaction = new sql.Transaction(pool)
@@ -33,7 +33,7 @@ async function registrarFactura(baseImponible, idContribuyente){
             request.input('_RFv',sql.Numeric,recnoFV)
             request.input('_RIv',sql.Numeric,recnoIv)
             request.input('_RMme',sql.Numeric,recnoMme)
-            request.input('_RMps',sql.Numeric,idContribuyente)
+            request.input('_RMps',sql.Numeric,recnoMontoProductoSaliente)
             request.input('_IDfv',sql.Numeric,idFv)
             request.input('_IDmme',sql.Numeric,idMme)
             request.input('_IDiv',sql.Numeric,idIv)
@@ -52,9 +52,9 @@ async function registrarFactura(baseImponible, idContribuyente){
                 @recno_iv numeric(10, 0),
                 @recno_mme numeric(10, 0),
                 @recno_mps numeric(10, 0),
-                @id_fv  numeric(10, 0),
-                @id_mme numeric(10, 0),
-                @id_iv numeric(10, 0);
+                @id_fv  numeric(13, 0),
+                @id_mme numeric(13, 0),
+                @id_iv numeric(13, 0);
             SET @nombre_servicio = @_NServicio;
             SET @concepto_factura = @_CFactura;
             SET @concepto_item = @_CItem;
@@ -88,17 +88,37 @@ async function registrarFactura(baseImponible, idContribuyente){
             //alta de fv
             `  insert into fv([RECNO],[IS_DELETED],[FVID],[FVUME],[FVTS],[FVEF],[FVQP],[FVQM]) 
             values(
-            @recno_fv,'N' ,@id_fv, @recno_mps,@fecha_sistema,@nombre_servicio,@base_imponible,(@base_imponible * 0.025)
+            @recno_fv,'N' ,@id_fv, @id_contribuyente,@fecha_sistema,@nombre_servicio,@base_imponible,(@base_imponible * @alicuota)
             );`+
             //alta de iv
             `  insert into iv([RECNO],[IS_DELETED],[IVID],[IVPR],[IVFV],[IVUME],[IVTS],[IVRF],[IVQP],[IVQMEX],[IVQM],[IVDMR]) 
             values (
-              @recno_iv, 'N', @id_iv, @concepto_item, @id_iv, @recno_mps, @fecha_sistema, @concepto_item, @base_imponible, @alicuota, (@base_imponible * 0.025), @nombre_servicio
+              @recno_iv, 'N', @id_iv, @concepto_item, @id_fv, @id_contribuyente, @fecha_sistema, @concepto_item, @base_imponible, @alicuota, (@base_imponible * @alicuota), @nombre_servicio
             )`+
             //alta mme
-            ``+
+            `INSERT INTO MME(   [RECNO],[IS_DELETED] , [MMEUME] ,[MMEHOTY] ,[MMEHOID] ,[MMEHCTY] ,[MMEFV] ,[MMEFR] ,[MMEQM] ,[MMEDMR] ,[MMEID] )
+            values(
+                @recno_mme  ,
+                'N' ,
+                @_IDContribuyente  ,
+                @concepto_factura   ,
+                @id_fv  ,
+                @concepto_factura  ,
+                @fecha_sistema,
+                @fecha_sistema,
+                (@base_imponible * @alicuota),
+                @nombre_servicio ,
+                @id_mme
+            );`+
             //update mps
-            ``
+            `UPDATE MPS 
+            SET MPSIV = @id_iv,
+            MPSHOID = @id_fv,
+            MPSHCID =  @id_fv,
+            MPSFR = @fecha_sistema , 
+            MPSQP = @base_imponible, 
+            MPSDMR = @nombre_servicio 
+            WHERE [RECNO] = @recno_mps;`
             , (err, result) => {
                 //resultados
                 console.log(result.recordset[0]);

@@ -35,9 +35,11 @@ router.route('/contribuyente').post((request,response)=>{
     })
 })
 //logica de negocios
-router.route('/test').get((request,response)=>{
-
-    logica.registrarFactura(5000000,'000004').then(result => {
+router.route('/test').put((request,response)=>{
+    const{
+        baseImponible, idContribuyente, recnoMontoProductoSaliente
+    } = request.query;
+    logica.registrarFactura(baseImponible,idContribuyente, recnoMontoProductoSaliente).then(result => {
         response.status(201).json();
     })
 })
