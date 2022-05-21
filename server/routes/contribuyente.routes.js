@@ -35,7 +35,7 @@ router.route('/contribuyente').post((request,response)=>{
     })
 })
 //logica de negocios
-router.route('/test').put((request,response)=>{
+router.route('/altaFactura').put((request,response)=>{
     const{
         baseImponible, idContribuyente, recnoMontoProductoSaliente
     } = request.query;

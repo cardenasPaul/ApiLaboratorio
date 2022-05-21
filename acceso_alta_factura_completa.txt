@@ -1,0 +1,3 @@
+Para hacer un alta del conjunto factura entrar en postman al link:
+http://localhost:8090/api/altaFactura?baseImponible=500000&idContribuyente=000004&recnoMontoProductoSaliente=31
+como put, entonces se podran modificar los parametros desde la tabla de datos
