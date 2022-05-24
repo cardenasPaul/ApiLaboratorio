@@ -119,14 +119,25 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             MPSQP = @base_imponible, 
             MPSDMR = @nombre_servicio 
             WHERE [RECNO] = @recno_mps;`
-            , (err, result) => {
-                //resultados
-                console.log(result.recordset[0]);
-                 
-                //se cierra el commit
-                transaction.commit(err => {
-                    console.log("Transaccion terminada con exito")
-                })
+            ,async (err, result) => {
+                try {
+                    //resultados
+                    console.log(result.recordset[0]);
+                    
+                    //se cierra el commit
+                    await transaction.commit(err => {
+                        console.log("Transaccion terminada con exito.")
+                    })
+
+                    //rollback
+                    await transaction.rollback(err => {
+                        console.log("Se hizo un rollback de la transaccion.")
+                    })
+                    pool.close()
+                } catch (error) {
+                    console.log("Error no detectable en la transaccion.")
+                }
+
             })
             
             
