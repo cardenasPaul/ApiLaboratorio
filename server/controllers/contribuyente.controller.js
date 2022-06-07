@@ -23,13 +23,13 @@ async function buscarContribuyentePorID(idContribuyente){
         console.log(error);
     }
 }
-async function buscarContribuyentePorCuit(cuit){
+async function getContribuyentesByCUIT(cuit){
     try {
         let pool = await sql.connect(config);
-        let facturas = await pool.request()
-        .input('cuit',sql.VarChar, cuit)
-        .query("SELECT [UME].UMEID AS ID FROM [UME] WHERE [UME].UMECU = @cuit;");
-        return facturas.recordsets;
+        let contribuyentes = await pool.request()
+        .input('umecu',sql.VarChar, cuit)
+        .query("SELECT * FROM UME where UMECU = @umecu");
+        return contribuyentes.recordsets;
     } catch (error) {
         console.log(error);
     }
@@ -88,11 +88,56 @@ async function agregarContribuyente(contribuyente){
     }
 }
 
+async function getIngBrutosByID(umeid){
+    try {
+        let pool = await sql.connect(config);
+        let contribuyentes = await pool.request()
+        .input('umeid',sql.VarChar, umeid)
+        .query(`SELECT
+        MPS.RECNO AS RECNO,         
+        MPS.MPSRF AS PERIODO, 
+        CONVERT(date, SUBSTRING(MPS.MPSFV,1,8), 103) AS FECHA_VENC, 
+        MPS.MPSQP AS BASE_IMPONIBLE, 
+        IV.IVQMEX AS ALICUOTA, 
+        IV.IVQM AS IMPORTE_IIBB, 
+        case 
+		when MPS.MPSFR = '' then null
+        else CONVERT(date, SUBSTRING(MPS.MPSFR,1,8), 103)
+		end AS FECHA_DECLARACION,
+        FV.FVID AS ID_FACTURA, 
+        CONVERT(date, SUBSTRING(MME.MMEFR,1,8), 103) AS FECHA_PAGO
+        FROM MPS        
+        FULL OUTER JOIN IV ON IV.IVID = MPS.MPSIV 
+        FULL OUTER JOIN FV ON FV.FVID = IV.IVFV 
+        FULL OUTER JOIN MME ON MME.MMEHOID = FV.FVID
+        WHERE MPSUME = @umeid
+        ORDER BY FECHA_VENC ASC`);
+        return await processIngresosBrutos(contribuyentes.recordsets);
+    } catch (error) {
+        console.log(error);
+    }
+}
+async function processIngresosBrutos(data){
+    if(data!=null){
+        var primeroSelecionado = false;
+        var  fecha = new Date().toLocaleDateString()
+        data[0].forEach(element => {
+            if(element['IMPORTE_IIBB'] == null && !primeroSelecionado ){
+                element['Seleccionado'] = true
+                primeroSelecionado = true
+            }else{
+                element['Seleccionado'] = false
+            } 
+        });
+    }
+    return data
+}
 
 
 module.exports = {
     getContribuyentes: devolverContribuyentes,
     getContribuyentesById: buscarContribuyentePorID,
     addContribuyente: agregarContribuyente,
-    findContribuyente: buscarContribuyentePorCuit
+    getContribuyentesByCUIT: getContribuyentesByCUIT,
+    getIngBrutosByID: getIngBrutosByID
 }

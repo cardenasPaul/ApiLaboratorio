@@ -3,6 +3,7 @@ const config ={
     password: 'lab2022',
     server: 'localhost',
     database:'PCBD700LaMarca',
+    requestTimeout: 300000,
     options:{
         trustedconnection: true,
         enableArithAbort: true,

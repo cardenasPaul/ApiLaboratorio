@@ -7,6 +7,17 @@ var controladorFactura = require('./facturas.controller');
 var controladorItem = require('./itemVentas.controller');
 var controladorMonedaEntrante = require('./movimientoMontoEntrante.controller');
 
+async function obtenerAlicuota(){
+    return utilidades.valorAlicuota();
+}
+async function obtenerMnotoIIBB(alicuota, monto){
+    try {
+        return parseFloat(alicuota) * parseFloat(monto);
+    } catch (error) {
+        console.log("No se pudo realizar la operacion. Eror: "+error)
+    }
+    return 0;
+}
 
 async function registrarFactura(baseImponible, idContribuyente, recnoMontoProductoSaliente){
     try {
@@ -69,7 +80,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             SET @id_fv = @_IDfv;
             SET @id_mme = @_IDmme;
             SET @id_iv = @_IDiv;` +
-            //debug de las variables
+            /*debug de las variables
             `SELECT 	
                 @alicuota AS [alicuota],
                 @base_imponible AS [base imponible], 
@@ -86,6 +97,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
                 @id_mme AS [id movimiento],
                 @id_iv AS [id item];`+
             //alta de fv
+            */
             `  insert into fv([RECNO],[IS_DELETED],[FVID],[FVUME],[FVTS],[FVEF],[FVQP],[FVQM]) 
             values(
             @recno_fv,'N' ,@id_fv, @id_contribuyente,@fecha_sistema,@nombre_servicio,@base_imponible,(@base_imponible * @alicuota)
@@ -122,7 +134,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             ,async (err, result) => {
                 try {
                     //resultados
-                    console.log(result.recordset[0]);
+                    //console.log(result.recordset[0]);
                     
                     //se cierra el commit
                     await transaction.commit(err => {
@@ -131,11 +143,11 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
 
                     //rollback
                     await transaction.rollback(err => {
-                        console.log("Se hizo un rollback de la transaccion.")
+                        console.log("Se hizo un rollback de la transaccion. "+ err)
                     })
                     pool.close()
                 } catch (error) {
-                    console.log("Error no detectable en la transaccion.")
+                    console.log("Error no detectable en la transaccion."+error)
                 }
 
             })
@@ -150,5 +162,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
     }
 }
 module.exports = {
-    registrarFactura: registrarFactura
+    registrarFactura: registrarFactura,
+    obtenerAlicuota: obtenerAlicuota,
+    obtenerMnotoIIBB: obtenerMnotoIIBB
 }

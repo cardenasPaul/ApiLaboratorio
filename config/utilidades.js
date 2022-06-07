@@ -11,6 +11,12 @@ function conceptoItem() {
 function conceptoFactura() {
     return constantes.conceptoFactura   
 }
+function preCalcularMontoFactura( montoDeclarado){
+
+    return {alicuota: parseFloat(valorAlicuota()), precalculo: parseFloat(valorAlicuota()) * montoDeclarado }
+}
+
+
 function fechaConFormato(){
     const todaysDate = new Date()
     return todaysDate.getFullYear() //año
