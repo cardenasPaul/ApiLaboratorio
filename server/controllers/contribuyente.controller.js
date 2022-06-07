@@ -120,7 +120,7 @@ async function getIngBrutosByID(umeid){
 async function processIngresosBrutos(data){
     if(data!=null){
         var primeroSelecionado = false;
-        var  fecha = new Date().toLocaleDateString()
+        var  fecha = new Date().toLocaleString()
         data[0].forEach(element => {
             if(element['IMPORTE_IIBB'] == null && !primeroSelecionado ){
                 element['Seleccionado'] = true

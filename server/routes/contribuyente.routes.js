@@ -37,10 +37,8 @@ router.route('/contribuyente').post((request,response)=>{
 
 router.route('/ingresosbrutos/:id').get((request,response)=>{
     contribuyentectr.getIngBrutosByID(request.params.id).then(result => {
-        if(result!=null){response.json(result[0]);}
-        
+        response.json(result[0]);
     }).catch(error=>{
-        response.json(null)
         console.log("No se pudieron recuperar datos." +  error)
     })
 })
