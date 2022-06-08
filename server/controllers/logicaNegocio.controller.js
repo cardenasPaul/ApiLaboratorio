@@ -117,7 +117,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
                 @id_fv  ,
                 @concepto_factura  ,
                 @fecha_sistema,
-                @fecha_sistema,
+                '',
                 (@base_imponible * @alicuota),
                 @nombre_servicio ,
                 @id_mme

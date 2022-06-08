@@ -102,16 +102,42 @@ async function getIngBrutosByID(umeid){
         IV.IVQM AS IMPORTE_IIBB, 
         case 
 		when MPS.MPSFR = '' then null
-        else CONVERT(date, SUBSTRING(MPS.MPSFR,1,8), 103)
+        else CONVERT(varchar, CONVERT(date, SUBSTRING(MPS.MPSFR,1,8),103)) + ' ' + SUBSTRING(MPS.MPSFR,9,2) +':'+ SUBSTRING(MPS.MPSFR,11,2) 
 		end AS FECHA_DECLARACION,
         FV.FVID AS ID_FACTURA, 
-        CONVERT(date, SUBSTRING(MME.MMEFR,1,8), 103) AS FECHA_PAGO
+        case 
+		when MME.MMEFR = '' then null
+		else CONVERT(varchar, CONVERT(date, SUBSTRING(MME.MMEFR,1,8),103)) + ' ' + SUBSTRING(MME.MMEFR,9,2) +':'+ SUBSTRING(MME.MMEFR,11,2) 
+        end AS FECHA_PAGO
         FROM MPS        
         FULL OUTER JOIN IV ON IV.IVID = MPS.MPSIV 
         FULL OUTER JOIN FV ON FV.FVID = IV.IVFV 
         FULL OUTER JOIN MME ON MME.MMEHOID = FV.FVID
         WHERE MPSUME = @umeid
         ORDER BY FECHA_VENC ASC`);
+        /*querry viejo
+        `SELECT
+        MPS.RECNO AS RECNO,         
+        MPS.MPSRF AS PERIODO, 
+        CONVERT(datetime, SUBSTRING(MPS.MPSFV,1,8), 103) AS FECHA_VENC, 
+        MPS.MPSQP AS BASE_IMPONIBLE, 
+        IV.IVQMEX AS ALICUOTA, 
+        IV.IVQM AS IMPORTE_IIBB, 
+        case 
+		when MPS.MPSFR = '' then null
+        else CONVERT(datetime, SUBSTRING(MPS.MPSFR,1,8), 103)
+		end AS FECHA_DECLARACION,
+        FV.FVID AS ID_FACTURA, 
+        case 
+		when MME.MMEFR = '' then null
+        else CONVERT(datetime, SUBSTRING(MME.MMEFR,1,8), 103) 
+        end AS FECHA_PAGO
+        FROM MPS        
+        FULL OUTER JOIN IV ON IV.IVID = MPS.MPSIV 
+        FULL OUTER JOIN FV ON FV.FVID = IV.IVFV 
+        FULL OUTER JOIN MME ON MME.MMEHOID = FV.FVID
+        WHERE MPSUME = @umeid
+        ORDER BY FECHA_VENC ASC`*/
         return await processIngresosBrutos(contribuyentes.recordsets);
     } catch (error) {
         console.log(error);
