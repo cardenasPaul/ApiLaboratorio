@@ -39,7 +39,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             request.input('_CItem',sql.NVarChar,utilidades.conceptoItem())
             request.input('_VAlicuota',sql.Numeric(13,6),utilidades.valorAlicuota())//parcearFecha
             request.input('_FSistema',sql.NVarChar,utilidades.fechaConFormato())
-            request.input('_BImponible',sql.Int,baseImponible)
+            request.input('_BImponible',sql.Numeric(13,6),baseImponible)
             request.input('_IDContribuyente',sql.NVarChar,idContribuyente)
             request.input('_RFv',sql.Numeric,recnoFV)
             request.input('_RIv',sql.Numeric,recnoIv)
@@ -53,7 +53,7 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             `USE [PCBD700LaMarca]
             declare 
                 @alicuota Numeric(13,6),
-                @base_imponible int,
+                @base_imponible Numeric(13,6),
                 @nombre_servicio varchar(10),
                 @concepto_item varchar(10),
                 @concepto_factura varchar(10),
@@ -133,21 +133,17 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
             WHERE [RECNO] = @recno_mps;`
             ,async (err, result) => {
                 try {
-                    //resultados
-                    //console.log(result.recordset[0]);
-                    
                     //se cierra el commit
                     await transaction.commit(err => {
                         console.log("Transaccion terminada con exito.")
                     })
-
+                    pool.close()
+                } catch (error) {
+                    console.log("Error no detectable en la transaccion."+error)
                     //rollback
                     await transaction.rollback(err => {
                         console.log("Se hizo un rollback de la transaccion. "+ err)
                     })
-                    pool.close()
-                } catch (error) {
-                    console.log("Error no detectable en la transaccion."+error)
                 }
 
             })
