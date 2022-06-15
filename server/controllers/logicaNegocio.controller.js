@@ -145,7 +145,6 @@ async function registrarFactura(baseImponible, idContribuyente, recnoMontoProduc
                         console.log("Se hizo un rollback de la transaccion. "+ err)
                     })
                 }
-
             })
             
             

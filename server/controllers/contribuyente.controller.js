@@ -138,7 +138,6 @@ async function processIngresosBrutos(data){
     return data
 }
 
-
 module.exports = {
     getContribuyentes: devolverContribuyentes,
     getContribuyentesById: buscarContribuyentePorID,
